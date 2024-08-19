@@ -13,4 +13,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@sqlite.org/sqlite-wasm"],
   },
+  base: "/example-sqlite-wasm",
 });
