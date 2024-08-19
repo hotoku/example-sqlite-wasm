@@ -31,6 +31,14 @@ const connectDB = (sqlite3: Sqlite3Static) => {
   return db;
 };
 
+export const dbSize = async (): Promise<number> => {
+  const sqlite3 = await sqlite3InitModule({
+    print: log,
+    printErr: error,
+  });
+  return sqlite3.capi.sqlite3_js_kvvfs_size();
+};
+
 /**
  * DBが初期化済みであれば閉じる
  */

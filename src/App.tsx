@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { getDatabase, closeDB, loadUsers } from "./db";
+import { getDatabase, closeDB, loadUsers, dbSize } from "./db";
 
 function App() {
   const [names, setNames] = useState<string[]>([]);
+  const [size, setSize] = useState<number | null>(null);
 
   useEffect(() => {
     getDatabase().then((db) => {
       db.exec("CREATE TABLE IF NOT EXISTS users(id INTEGER, name TEXT)");
       loadUsers().then((users) => setNames(users.map((u) => u.name)));
+      dbSize().then((s) => setSize(s));
     });
     return () => {
       // clean up
@@ -42,6 +44,7 @@ function App() {
     console.log(values);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setNames(values.map((v: any) => v.name));
+    setSize(await dbSize());
   };
 
   return (
@@ -56,6 +59,7 @@ function App() {
             <li key={i}>{n}</li>
           ))}
         </ul>
+        <p>DBサイズ: {size ?? "不明"} bytes</p>
       </div>
     </>
   );
