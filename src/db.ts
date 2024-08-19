@@ -70,3 +70,18 @@ export const getDatabase = async (): Promise<Database> => {
 
   throw new Error("unknown error");
 };
+
+export type User = {
+  id: number;
+  name: string;
+};
+
+export const loadUsers = async (): Promise<User[]> => {
+  const db = await getDatabase();
+  const values = db.exec({
+    sql: "SELECT id, name FROM users",
+    rowMode: "object",
+    returnValue: "resultRows",
+  });
+  return values as User[];
+};

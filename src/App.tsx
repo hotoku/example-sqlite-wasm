@@ -1,9 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
-import { getDatabase, closeDB } from "./db";
+import { getDatabase, closeDB, loadUsers } from "./db";
 
 function App() {
+  const [names, setNames] = useState<string[]>([]);
+
   useEffect(() => {
+    getDatabase().then((db) => {
+      db.exec("CREATE TABLE IF NOT EXISTS users(id INTEGER, name TEXT)");
+      loadUsers().then((users) => setNames(users.map((u) => u.name)));
+    });
     return () => {
       // clean up
       closeDB();
@@ -11,12 +17,7 @@ function App() {
   }, []);
 
   const executeQuery = async () => {
-    // 初回実行時に生成、以降は生成済みのconnectionを返す
     const db = await getDatabase();
-
-    // テーブル作成
-    db.exec("CREATE TABLE IF NOT EXISTS users(id INTEGER, name TEXT)");
-
     const select_max = "SELECT max(id) as max_count FROM users";
     const max = (db.selectValue(select_max) as number) ?? 0;
     console.log(`row count: ${max}`);
@@ -39,6 +40,8 @@ function App() {
       returnValue: "resultRows",
     });
     console.log(values);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setNames(values.map((v: any) => v.name));
   };
 
   return (
@@ -48,6 +51,11 @@ function App() {
           SQLite Wasm実行
         </button>
         <p>実行結果はDevToolsのConsoleに出力されます。</p>
+        <ul style={{ listStyle: "none" }}>
+          {names.map((n, i) => (
+            <li key={i}>{n}</li>
+          ))}
+        </ul>
       </div>
     </>
   );
